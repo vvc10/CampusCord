@@ -1,8 +1,6 @@
-const mongoose = require('mongoose')
-
 const ServerSchema = new mongoose.Schema({
     serverName: {
-        type:String,
+        type: String,
         default: 'New Server'
     },
     ServerProfile: {
@@ -10,11 +8,11 @@ const ServerSchema = new mongoose.Schema({
         required: false,
         default: 'server.jpg'
     },
-    admin:{
+    admin: {
         type: Array,
         required: true
     },
-    channelAvailable:{
+    channelAvailable: {
         type: Array,
         default: []
     },
@@ -22,10 +20,14 @@ const ServerSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    members:{
+    members: {
         type: Array,
         default: []
+    },
+    isPublic: {  
+        type: Boolean,
+        default: false
     }
-})
+});
 
-module.exports = mongoose.model('Server', ServerSchema)
+module.exports = mongoose.model('Server', ServerSchema);

@@ -100,24 +100,51 @@ app.get('/auth/user', (req, res) => {
 })
 app.post('/api/register/server', async (req, res) => {
     if (req.isAuthenticated()) {
-        let name = req.body.name
-        let _id = req.body.admin
-        console.log(name, _id)
-        if (name === '' || _id === '') {
-            res.send({ error: 'invalid' })
-        } else {
-            let server = await ServerModel.create({ serverName: name, admin: _id, members: [_id] })
-            User.findOne({ _id: _id }, (err, user) => {
-                if (err) throw err
-                user.servers.push(server._id)
-                user.save()
-                res.send({ status: 'done' })
-            })
+        const { name, admin, isPublic } = req.body;
+        console.log(name, admin, isPublic);
+
+        if (!name || !admin) {
+            return res.send({ error: 'invalid' });
+        }
+
+        try {
+            // Create a new server in the "ServerModel"
+            let server = await ServerModel.create({
+                serverName: name,
+                admin: [admin],  // Ensure admin is stored as an array
+                members: [admin],  // Include the admin as the first member
+                isPublic: isPublic  // Save the isPublic flag
+            });
+
+            // Add the server to the user's server list
+            let user = await User.findOne({ _id: admin });
+            if (!user) {
+                return res.send({ error: 'invalid user' });
+            } else {
+                user.servers.push(server._id);
+                await user.save();
+
+                // If the server is public, save it to the "test.explore_sec" collection
+                if (isPublic) {
+                    let exploreServer = new ExploreSecModel({
+                        serverId: server._id,
+                        serverName: name,
+                        serverProfile: server.ServerProfile // Assuming the profile comes from the server
+                    });
+                    await exploreServer.save();
+                }
+
+                return res.send({ status: 'done', serverId: server._id });
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({ error: 'Server creation failed' });
         }
     } else {
-        res.send({ error: 'not authenticated' }).status(401)
+        res.status(401).send({ error: 'not authenticated' });
     }
-})
+});
+
 app.post('/api/get/server', async (req, res) => {
     if (req.isAuthenticated()) {
         let id = req.body.id
@@ -350,32 +377,63 @@ app.post('/upload-file', async (req, res) => {
         })
     }
 })
-app.get('/join/:id', (req, res) => {
+// Fetch authenticated user data
+app.get('/auth/user', (req, res) => {
     if (req.isAuthenticated()) {
-        let id = req.params.id
-        let userId = req.user.id
-        User.findOne({ _id: userId }, (err, user) => {
-            if (!user.servers.includes(id)) {
-                user.servers.push(id)
-                user.save()
-            }
-        })
-        ServerModel.findOne({ _id: id }, (err, server) => {
-            if (!server.members.includes(userId)) {
-                server.members.push(userId)
-                server.save()
-                io.sockets.to(id).emit("member-joined", id, userId)
-                res.send('Done boi')
-            }
-            else {
-                res.send('Already in!')
-            }
-        })
+        const userData = {
+            id: req.user._id,
+            name: req.user.displayName,
+            email: req.user.email,
+            profile: req.user.image,
+            server: req.user.servers
+        };
+        res.send(userData);
     } else {
-        res.send('Sign in boi').status(401)
+        res.send('');
     }
 })
-app.get('/*',(req,res)=>{
+
+app.get('/join/:id', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).send('Sign in required');
+    }
+
+    const serverId = req.params.id;
+    const userId = req.user.id;
+
+    try {
+        // Find and update the user
+        let user = await User.findOne({ _id: userId });
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        if (!user.servers.includes(serverId)) {
+            user.servers.push(serverId);
+            await user.save();
+        }
+
+        // Find and update the server
+        let server = await ServerModel.findOne({ _id: serverId });
+        if (!server) {
+            return res.status(404).send('Server not found');
+        }
+
+        if (!server.members.includes(userId)) {
+            server.members.push(userId);
+            await server.save();
+            io.sockets.to(serverId).emit("member-joined", serverId, userId);
+            return res.send('Joined successfully');
+        } else {
+            return res.send('Already a member');
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, "usercontent", "index.html"));
 })
 io.on('connection', socket => {
