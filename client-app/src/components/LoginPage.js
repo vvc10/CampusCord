@@ -1,128 +1,104 @@
-import React, { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-solid-svg-icons'
-import { faKey } from '@fortawesome/free-solid-svg-icons'
-import { faGoogle } from '@fortawesome/free-brands-svg-icons'
-import { Link, Redirect } from 'react-router-dom'
+// components/Login.js
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser, faKey } from '@fortawesome/free-solid-svg-icons';
+import { TbUnlink } from "react-icons/tb";
 import axios from 'axios';
-import { selectUser, login } from '../features/userSlice'
-import { useSelector, useDispatch} from 'react-redux'
-import url from "../url.json"
- 
-import '../login.css'
+import url from '../url.json';
 
-export default function LoginPage(props) {
-    const user = useSelector(selectUser)
-    const dispatch = useDispatch();
-    var [email, setEmail] = useState('')
-    var [password, setPassword] = useState('')
-    var [error, setError] = useState('')
-    var [eerror, seteError] = useState('')
-    var [perror, setpError] = useState('')
+function Login({ setLoginState, isAdmin, setIsAdmin }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [adminCode, setAdminCode] = useState('');
+  const [error, setError] = useState('');
+  const [eerror, seteError] = useState('');
+  const [perror, setpError] = useState('');
+  const [adminCodeError, setAdminCodeError] = useState('');
 
-    function urlencodeFormData(fd) {
-        var s = '';
-        function encode(s) { return encodeURIComponent(s).replace(/%20/g, '+'); }
-        for (var pair of fd.entries()) {
-            if (typeof pair[1] == 'string') {
-                s += (s ? '&' : '') + encode(pair[0]) + '=' + encode(pair[1]);
-            }
-        }
-        return s;
+  function handleValidationLogin() {
+    let formIsValid = true;
+
+    if (email === "" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      formIsValid = false;
+      seteError('Enter a valid email');
     }
 
-    function handleValidation() {
-        let fields = { email, password };
-        let formIsValid = true;
-        if (typeof fields["email"] !== "undefined") {
-            let lastAtPos = fields["email"].lastIndexOf('@');
-            let lastDotPos = fields["email"].lastIndexOf('.');
-
-            if (!(lastAtPos < lastDotPos && lastAtPos > 0 && fields["email"].indexOf('@@') === -1 && lastDotPos > 2 && (fields["email"].length - lastDotPos) > 2)) {
-                formIsValid = false;
-                seteError('invalid email');
-            }
-        }
-        if (fields["email"] === "") {
-            formIsValid = false;
-            seteError('Enter a valid email');
-        }
-        if (fields['password'].length < 8) {
-            formIsValid = false;
-            setpError('Password must be at least 8 characters')
-        }
-        return formIsValid;
+    if (password.length < 8) {
+      formIsValid = false;
+      setpError('Password must be at least 8 characters');
     }
 
-    function handleSubmit() {
-        if (handleValidation()) {
-            let formData = new FormData();
-            formData.append('username', email)
-            formData.append('password', password)
-            axios({
-                method: "POST",
-                url: `${url.server}/auth/login`,
-                headers: {
-                    'Access-Control-Allow-Origin': url.frontend,
-                    'Access-Control-Allow-Credentials': 'true',
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'include',
-                withCredentials: true,
-                data: urlencodeFormData(formData)
-            }).then((res) => {
-                if (res.data.error === null) {
-                    dispatch(login({
-                        id: res.data.id,
-                        name: res.data.name,
-                        server: res.data.server,
-                        profile: res.data.profile,
-                        email: res.data.email
-                    }))
-                } else {
-                    setError(res.data.error)
-                }
-            });
-
-        }
+    if (isAdmin && adminCode === "") {
+      formIsValid = false;
+      setAdminCodeError('Admin code is required');
     }
-    return (
-        <>
-        <div className="login-body">
-            <div className="login-container">
-                <h2 className="noselect">Welcome Back!</h2>
-                <h5 className="noselect">We're so excited to see you again!</h5>
-                <form className="login-form">
-                    <h4 style={{ color: 'red', fontWeight: '500' }}> {error}</h4>
-                    <label className="noselect">Email</label>
-                    <div className="holder">
-                        <FontAwesomeIcon icon={faUser} color="grey" className="usr-icon" id="usr-icon" />
-                        <input type="email" required className="login-username noselect" placeholder="Email" id="email" name="username" onChange={event => {
-                            setEmail(event.target.value);
-                            setError('')
-                            seteError('')
-                        }} />
-                    </div>
-                    <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '0' }}> {eerror}</h4>
-                    <label className="noselect">password</label>
-                    <div className="holder">
-                        <FontAwesomeIcon icon={faKey} color="grey" className="pass-icon" />
-                        <input type="password" required className="login-password noselect" placeholder="Password" id="password" name="password" onChange={event => {
-                            setPassword(event.target.value)
-                            setpError('')
-                            setError('')
-                        }} />
-                    </div>
-                    <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '10px' }}> {perror}</h4>
-                    <a href="/forgot-password" className="btn forgot noselect">Forgot Password ?</a>
 
-                </form>
-                <button className="btn login noselect" onClick={handleSubmit}>Login</button>
-                <Link tp="/register" className="btn sign-up noselect">Need an account? <span>sign up</span></Link>
-                <h4 className="noselect">Or</h4>
-                <a href="http://localhost:3000/auth/google" className="btn btn-google noselect"><FontAwesomeIcon icon={faGoogle} /><h4>Continue with Google</h4></a>
-            </div>
+    return formIsValid;
+  }
+
+  function handleSubmitLogin() {
+    if (handleValidationLogin()) {
+      const formData = new FormData();
+      formData.append('username', email);
+      formData.append('password', password);
+      if (isAdmin) {
+        formData.append('adminCode', adminCode);
+      }
+
+      axios.post(`${url.server}auth/login`, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        withCredentials: true,
+      }).then(res => {
+        if (!res.data.error) {
+          setLoginState(true);
+        } else {
+          setError(res.data.error);
+        }
+      });
+    }
+  }
+
+  return (
+    <div className="login-form">
+      <h2 className="text-2xl font-bold mb-4 text-center">
+        CampusC<TbUnlink className='text-[16px]' />rd
+      </h2>
+      <h5 className="text-gray-600 text-center mb-6">We're so excited to see you again!</h5>
+      <form className="space-y-4">
+        <h4 className="text-red-500 font-medium">{error}</h4>
+        <div>
+          <label className="block text-gray-700">Email</label>
+          <div className="flex items-center border border-gray-300 rounded-md">
+            <FontAwesomeIcon icon={faUser} color="grey" className="p-2" />
+            <input type="email" required className="flex-1 p-2 outline-none" placeholder="Email" onChange={(e) => { setEmail(e.target.value); seteError(''); }} />
+          </div>
+          <h4 className="text-red-500 font-medium">{eerror}</h4>
         </div>
-        </>
-    )
+        <div>
+          <label className="block text-gray-700">Password</label>
+          <div className="flex items-center border border-gray-300 rounded-md">
+            <FontAwesomeIcon icon={faKey} color="grey" className="p-2" />
+            <input type="password" required className="flex-1 p-2 outline-none" placeholder="Password" onChange={(e) => { setPassword(e.target.value); setpError(''); }} />
+          </div>
+          <h4 className="text-red-500 font-medium">{perror}</h4>
+        </div>
+        <label className="inline-flex items-center mt-2">
+          <input type="checkbox" checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} className="form-checkbox" />
+          <span className="ml-2 text-gray-700">Login as Admin</span>
+        </label>
+        {isAdmin && (
+          <div>
+            <label className="block text-gray-700">Admin Code</label>
+            <input type="text" className="border border-gray-300 rounded-md p-2 w-full" placeholder="Admin Code" onChange={(e) => { setAdminCode(e.target.value); setAdminCodeError(''); }} />
+            <h4 className="text-red-500 font-medium">{adminCodeError}</h4>
+          </div>
+        )}
+        <button type="button" onClick={handleSubmitLogin} className="w-full py-2 mt-4 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">Login</button>
+      </form>
+    </div>
+  );
 }
+
+export default Login;

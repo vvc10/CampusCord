@@ -28,6 +28,7 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "peer": "^0.6.1",
+    "react-image-file-resizer": "^0.4.8",
     "socket.io": "^4.1.2",
     "uuidv4": "^6.2.13"
   }

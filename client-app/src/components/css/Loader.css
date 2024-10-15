@@ -1,0 +1,30 @@
+.loader-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: fit-content; /* Fullscreen loader */
+    margin: auto;
+    background-color: transparent; /* Optional dark background */
+  }
+  
+  .loader {
+    width: 30px;
+    height: 30px;
+    border: 6px solid transparent;
+    border-top: 6px solid #b5b5b5; /* Blue color for aesthetic effect */
+    border-right: 6px solid #b5b5b5; /* Purple */
+    border-bottom: 6px solid #b5b5b5; /* Red */
+    border-radius: 50%;
+    animation: rotate 1.5s linear infinite; /* Smooth infinite rotation */
+  }
+  
+  /* Keyframe for rotation animation */
+  @keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  

@@ -7,12 +7,16 @@ import { setServer } from '../features/serverSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import url from "../url.json";
 import '../components/css/ServerList.css';
+import Resizer from 'react-image-file-resizer';
+
+
 
 export default function ServerList(props) {
     const dispatch = useDispatch();
     const [server, setServerL] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [serverName, setServerName] = useState('');
+    const [serverProfile, setServerProfile] = useState(''); // Add server profile state
     const [isPublic, setIsPublic] = useState(true);
     const [errorMessage, setErrorMessage] = useState(''); // For error handling
     const socket = props.socket;
@@ -46,19 +50,33 @@ export default function ServerList(props) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ id: user.id })
+            
+
         })
-        .then(response => response.json())
-        .then(res => {
-            if (res.error === 'null') {
-                setServerL(res.servers || []);
-            }
-            if (res.servers && res.servers.length > 0) {
-                setCurrentServer(res.servers[res.servers.length - 1]);
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching servers:", error);
-        });
+            .then(response => {
+               
+                if (!response.ok) {
+                    // If the response status is not OK, handle it
+                    return response.text().then(text => {
+                        throw new Error(`Error ${response.status}: ${text}`);
+                    });
+                }
+    
+                return response.json();
+                 
+            })
+            .then(res => {
+                if (res.error === 'null') {
+                    setServerL(res.servers || []);
+                }
+                if (res.servers && res.servers.length > 0) {
+                    setCurrentServer(res.servers[res.servers.length - 1]);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching servers:", error);
+                setErrorMessage(error.message);  // Display the error message to the user
+            });
     }
 
     // Fetch server list when component mounts
@@ -84,84 +102,82 @@ export default function ServerList(props) {
         });
     }, [server, socket]);
 
- // Function to create a new server
-function createServer() {
-    if (!serverName.trim()) {
-        setErrorMessage('Server name cannot be empty');
-        return;
+
+    function handleImageUpload(e) {
+        const file = e.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        Resizer.imageFileResizer(
+            file,
+            640, // Max width
+            640, // Max height
+            'JPEG', // Format
+            80, // Quality
+            0, // Rotation
+            (uri) => {
+                setServerProfile(uri); // Use the resized image
+            },
+            'base64' // Output type
+        );
     }
 
-    const requestBody = {
-        name: serverName,
-        admin: user.id,
-        isPublic: isPublic
-    };
 
-    fetch(`${url.server}api/register/server`, {
-        method: "POST",
-        credentials: 'include',
-        withCredentials: true,
-        headers: {
-            'Access-Control-Allow-Origin': url.frontend,
-            'Access-Control-Allow-Credentials': 'true',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-    })
-    .then(response => response.json())
-    .then(res => {
-        if (res.status === 'done') {
-            GetServerList();
-            console.log(`Server created: ${isPublic ? 'Public' : 'Private'}`);
-            setShowModal(false);
-            setServerName('');  // Reset server name
-            setErrorMessage('');  // Clear any previous error
-            
-            // If the server is public, save it to exploreDB
-            if (isPublic) {
-                saveToExploreDB(res.serverId, serverName);
-            }
-        } else {
-            setErrorMessage(res.error || 'Failed to create server');
+    function createServer() {
+        if (!serverName.trim()) {
+            setErrorMessage('Server name cannot be empty');
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error during server creation:', error);
-        setErrorMessage('Error creating server');
-    });
-}
 
-// Function to save public server to exploreDB
-function saveToExploreDB(serverId, serverName) {
-    const exploreBody = {
-        serverId: serverId,
-        serverName: serverName,
-        addedBy: user.id
-    };
+        const requestBody = {
+            name: serverName,
+            admin: user.id,
+            isPublic: isPublic,
+            serverProfile: serverProfile
+        };
+        console.log("Requset Body:", requestBody);
 
-    fetch(`${url.server}api/explore/add`, {
-        method: "POST",
-        credentials: 'include',
-        withCredentials: true,
-        headers: {
-            'Access-Control-Allow-Origin': url.frontend,
-            'Access-Control-Allow-Credentials': 'true',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(exploreBody)
-    })
-    .then(response => response.json())
-    .then(res => {
-        if (res.status === 'done') {
-            console.log('Server successfully added to exploreDB');
-        } else {
-            console.error('Failed to add server to exploreDB:', res.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error saving server to exploreDB:', error);
-    });
-}
+        fetch(`${url.server}api/register/server`, {
+            method: "POST",
+            credentials: 'include',
+            withCredentials: true,
+            headers: {
+                'Access-Control-Allow-Origin': url.frontend,
+                'Access-Control-Allow-Credentials': 'true',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Error ${response.status}: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(res => {
+                if (res.status === 'done') {
+                    GetServerList();
+                    setShowModal(false);
+                    setServerName('');
+                    setServerProfile('');
+                    setErrorMessage('');
+
+                } else {
+                    setErrorMessage(res.error || 'Failed to create server');
+                }
+            })
+            .catch(error => {
+                console.error('Error during server creation:', error);
+                setErrorMessage(error.message);
+            });
+    }
+
+
+
 
     return (
         <>
@@ -178,11 +194,15 @@ function saveToExploreDB(serverId, serverName) {
                                 />
                             ))}
                         </div>
-                        <div onClick={() => setShowModal(true)} className='servercreatediv'>
+                        <div onClick={() => {
+                            setShowModal(true);
+                            setErrorMessage('');  // Clear any existing error when opening the modal
+                        }} className='servercreatediv'>
                             <div className='createserverbtn' data-name="Create new server">
                                 <FontAwesomeIcon icon={faPlus} />
                             </div>
                         </div>
+
                     </div>
                 ) : (
                     <>
@@ -212,6 +232,13 @@ function saveToExploreDB(serverId, serverName) {
                             onChange={(e) => setServerName(e.target.value)}
                         />
 
+                        <label className="block mb-2">Server Profile</label>
+                        <input
+                            type="file"
+                            className="w-full mb-4"
+                            onChange={handleImageUpload}  // Handle image upload
+                        />
+
                         <label className="block mb-2">Visibility</label>
                         <div className="mb-4">
                             <input
@@ -223,7 +250,7 @@ function saveToExploreDB(serverId, serverName) {
                                 onChange={() => setIsPublic(true)}
                             />
                             <label htmlFor="public" className="ml-2">Public</label>
-
+                            <br />
                             <input
                                 type="radio"
                                 id="private"
@@ -231,29 +258,23 @@ function saveToExploreDB(serverId, serverName) {
                                 value="private"
                                 checked={!isPublic}
                                 onChange={() => setIsPublic(false)}
-                                className="ml-4"
                             />
                             <label htmlFor="private" className="ml-2">Private</label>
                         </div>
 
-                        <div className="flex justify-end">
-                            <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded mr-2"
-                                onClick={createServer}
-                            >
-                                Create
-                            </button>
-                            <button
-                                className="bg-gray-300 px-4 py-2 rounded"
-                                onClick={() => {
-                                    setShowModal(false);
-                                    setServerName('');  // Reset fields on modal close
-                                    setErrorMessage(''); // Clear any errors
-                                }}
-                            >
-                                Cancel
-                            </button>
-                        </div>
+                        <button
+                            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                            onClick={createServer}
+                        >
+                            Create
+                        </button>
+
+                        <button
+                            className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 ml-2"
+                            onClick={() => setShowModal(false)}
+                        >
+                            Cancel
+                        </button>
                     </div>
                 </div>
             )}

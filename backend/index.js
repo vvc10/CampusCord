@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
 var url = require('./url.json')
 require('dotenv').config()
@@ -15,9 +16,12 @@ const fs = require('fs/promises');
 const Fs = require('fs');
 const { uuid } = require('uuidv4');
 var morgan = require('morgan')
+
 mongo()
 const User = require('./models/user')
 const ServerModel = require('./models/ServerModel')
+const ExploreSecModel = require('./models/ExploreSecModel'); // Adjust path as necessary
+
 const ChannelModel = require('./models/ChannelModel')
 const ChatModel = require('./models/ChatModel')
 const ActiveVoiceChat = require('./models/ActiveVideoChatsModel')
@@ -33,7 +37,17 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(fileUpload({}));
 app.use(express.static('usercontent'))
+
+// Set the limit to something appropriate (e.g., '5mb')
+app.use(bodyParser.json({ limit: '1mb' }));
+app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
+
 require('./passportConfig')(passport)
+
+
+
+
+
 function handleValidation(a) {
     let email = a.email
     let username = a.username
@@ -100,8 +114,7 @@ app.get('/auth/user', (req, res) => {
 })
 app.post('/api/register/server', async (req, res) => {
     if (req.isAuthenticated()) {
-        const { name, admin, isPublic } = req.body;
-        console.log(name, admin, isPublic);
+        const { name, admin, isPublic, serverProfile } = req.body; // Ensure you get serverProfile
 
         if (!name || !admin) {
             return res.send({ error: 'invalid' });
@@ -111,31 +124,34 @@ app.post('/api/register/server', async (req, res) => {
             // Create a new server in the "ServerModel"
             let server = await ServerModel.create({
                 serverName: name,
-                admin: [admin],  // Ensure admin is stored as an array
-                members: [admin],  // Include the admin as the first member
-                isPublic: isPublic  // Save the isPublic flag
+                admin: [admin],
+                members: [admin],
+                isPublic: isPublic,
+                ServerProfile: serverProfile // Save the server profile image
             });
 
             // Add the server to the user's server list
             let user = await User.findOne({ _id: admin });
             if (!user) {
                 return res.send({ error: 'invalid user' });
-            } else {
-                user.servers.push(server._id);
-                await user.save();
-
-                // If the server is public, save it to the "test.explore_sec" collection
-                if (isPublic) {
-                    let exploreServer = new ExploreSecModel({
-                        serverId: server._id,
-                        serverName: name,
-                        serverProfile: server.ServerProfile // Assuming the profile comes from the server
-                    });
-                    await exploreServer.save();
-                }
-
-                return res.send({ status: 'done', serverId: server._id });
             }
+
+            user.servers.push(server._id);
+            await user.save();
+
+            // If the server is public, save it to the "explore_sec" collection
+            if (isPublic) {
+                let exploreServer = new ExploreSecModel({
+                    serverId: server._id,
+                    serverName: name,
+                    serverProfile: serverProfile, // Use the provided serverProfile
+                    addedBy: admin
+                });
+                await exploreServer.save();
+                console.log("explore data:",exploreServer);
+            }
+
+            return res.send({ status: 'done', serverId: server._id });
         } catch (err) {
             console.error(err);
             res.status(500).send({ error: 'Server creation failed' });
@@ -145,24 +161,64 @@ app.post('/api/register/server', async (req, res) => {
     }
 });
 
+// Endpoint to get private servers for a user
 app.post('/api/get/server', async (req, res) => {
     if (req.isAuthenticated()) {
-        let id = req.body.id
-        let serverData = []
-        let user = await User.findOne({ _id: id })
-        if (!user) res.send({ error: 'invalid user' })
-        let servers = user.servers
-        for (var i = 0; i < servers.length; i++) {
-            await ServerModel.findOne({ _id: servers[i] }, (err, server) => {
-                if (err) throw err
-                serverData.push(server);
-            })
+        let id = req.body.id;
+        let serverData = [];
+
+        try {
+            let user = await User.findOne({ _id: id });
+            if (!user) {
+                return res.send({ error: 'invalid user' });
+            }
+
+            let servers = user.servers;
+            serverData = await ServerModel.find({ _id: { $in: servers } });
+
+            res.send({ error: 'null', servers: serverData });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({ error: 'Failed to fetch private servers' });
         }
-        res.send({ error: 'null', servers: serverData })
     } else {
-        res.send({ error: 'not authenticated' }).status(401)
+        res.status(401).send({ error: 'not authenticated' });
     }
-})
+});
+
+
+// index.js - Backend API to get public servers
+app.post('/api/get/explore', async (req, res) => {
+    if (req.isAuthenticated()) {
+        try {
+            // Fetch all public servers from the "explore_sec" collection and populate the serverId field
+            const exploreServers = await ExploreSecModel.find({}).populate('serverId');
+
+            if (!exploreServers || exploreServers.length === 0) {
+                return res.send({ error: 'no servers found' });
+            }
+
+            // Prepare the server data to send back
+            const serverData = exploreServers.map(server => ({
+                serverId: server.serverId._id,
+                serverName: server.serverId.serverName,
+                serverProfile: server.serverId.serverProfile,
+                addedBy: server.addedBy,
+            }));
+
+            res.send({ error: null, servers: serverData });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send({ error: 'Failed to fetch public servers' });
+        }
+    } else {
+        res.status(401).send({ error: 'not authenticated' });
+    }
+});
+
+
+
+
 app.post('/api/get/channel', async (req, res) => {
     if (req.isAuthenticated()) {
         let id = req.body.id
@@ -393,7 +449,9 @@ app.get('/auth/user', (req, res) => {
     }
 })
 
+
 app.get('/join/:id', async (req, res) => {
+    // Check if the user is authenticated
     if (!req.isAuthenticated()) {
         return res.status(401).send('Sign in required');
     }
@@ -402,36 +460,64 @@ app.get('/join/:id', async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // Find and update the user
-        let user = await User.findOne({ _id: userId });
+        // Fetch the user by their ID
+        let user = await User.findById(userId);
         if (!user) {
             return res.status(404).send('User not found');
         }
 
-        if (!user.servers.includes(serverId)) {
-            user.servers.push(serverId);
-            await user.save();
+        // Check if the user is already a member of the server
+        if (user.servers && user.servers.includes(serverId)) {
+            return res.send('You are already a member of this server');
         }
 
-        // Find and update the server
-        let server = await ServerModel.findOne({ _id: serverId });
+        // Add the server to the user's list of servers if not already added
+        user.servers.push(serverId);
+        await user.save();
+
+        // Fetch the server by its ID
+        let server = await ServerModel.findById(serverId);
         if (!server) {
             return res.status(404).send('Server not found');
         }
 
+        // Initialize the members array if it's not already initialized
+        if (!server.members) {
+            server.members = [];
+        }
+
+        // Add the user to the server's member list if not already present
         if (!server.members.includes(userId)) {
             server.members.push(userId);
             await server.save();
+
+            // Emit event for a new member joining the server
             io.sockets.to(serverId).emit("member-joined", serverId, userId);
             return res.send('Joined successfully');
-        } else {
-            return res.send('Already a member');
         }
+
+        // If the user is already in the server, return a message
+        return res.send('You are already a member of this server');
+
     } catch (err) {
-        console.error(err);
+        console.error('Error processing join request:', err);
         return res.status(500).send('Internal server error');
     }
 });
+
+
+app.post('/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Logout failed');
+        }
+        res.clearCookie('connect.sid'); // Remove session cookie if applicable
+        return res.status(200).send('Logout successful');
+    });
+});
+
+
+
 
 app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, "usercontent", "index.html"));

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const ServerSchema = new mongoose.Schema({
     serverName: {
         type: String,

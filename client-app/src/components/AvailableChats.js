@@ -390,7 +390,7 @@ export default function AvailableChats(props) {
                             <>
                                 <div className='py-[20px] px-[10px] h-fit m-auto'>
                                     <p className='text-[13px] font-[300] text-white italic opacity-70'> Channels will be visible here.</p>
-                                    <button className='flex flex-row gap-[10px] bg-white items-center px-2 py-1 text-center text-black mx-auto my-3 rounded-[10px]' onClick={() => setChannelModalOpen(true)}>
+                                    <button className='flex flex-row gap-[10px] bg-[white] items-center px-2 py-1 text-center text-black mx-auto my-3 rounded-[10px]' onClick={() => setChannelModalOpen(true)}>
                                         <p className='text-[16px]'>Create</p>
                                         <GrConnect
                                             className="text-[14px] text-black transition duration-300 ease-in-out cursor-pointer"

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
         required: true,
         default: 'user.jpg'
     },
-    userConfirmed:{
+    userConfirmed: {
         type: Boolean,
         default: false
     },
@@ -26,10 +26,12 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    servers:{
-        type: Array,
-        default: []
-    }
-})
+    servers: [
+        {
+            type: mongoose.Schema.Types.ObjectId,  // Use ObjectId to reference Server documents
+            ref: 'Server'  // Reference the Server model
+        }
+    ]
+});
 
-module.exports = mongoose.model('user', UserSchema)
+module.exports = mongoose.model('User', UserSchema);

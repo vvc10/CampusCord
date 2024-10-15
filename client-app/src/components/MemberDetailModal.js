@@ -42,14 +42,14 @@ export default function MemberDetailsModal({ members, onClose, totalmembers }) {
                     })}
                 </div>
 
-                <div className='flex justify-end'>
+                {/* <div className='flex justify-end'>
                     <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-4 rounded-md text-sm"
+                        className="bg-transparent hover:bg-transparent text-white py-1 px-4 rounded-md text-sm"
                         onClick={onClose}
                     >
                         Close
                     </button>
-                </div>
+                </div> */}
             </div>
         </div>
     );

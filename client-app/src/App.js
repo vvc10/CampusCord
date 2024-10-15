@@ -9,6 +9,12 @@ import './login.css';
 import url from "./url.json";
 import AppHome from './components/AppHome';
 import Loading from "./components/Loading";
+import { ImPowerCord } from "react-icons/im";
+import { TbUnlink } from "react-icons/tb";
+import bgImg from './components/img/1.jpg';
+import Landing from './components/Landing';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Corrected import
+import Login from './components/LoginPage';
 
 function App() {
   let [ShowApp, setShowApp] = useState(false);
@@ -25,9 +31,9 @@ function App() {
   var [adminCode, setAdminCode] = useState('');
   var [adminCodeError, setAdminCodeError] = useState('');
   var [isAdmin, setIsAdmin] = useState(false);
-  
+
   const dispatch = useDispatch();
-  
+
   useEffect(() => {
     const requestOptions = {
       method: 'GET',
@@ -55,6 +61,7 @@ function App() {
       });
   }, [dispatch, loginState]);
 
+  // Prevent drag and drop default behavior
   window.addEventListener("dragover", function (e) {
     e.preventDefault();
   }, false);
@@ -77,7 +84,7 @@ function App() {
   function handleValidationLogin() {
     let fields = { email, password };
     let formIsValid = true;
-    
+
     if (typeof fields["email"] !== "undefined") {
       let lastAtPos = fields["email"].lastIndexOf('@');
       let lastDotPos = fields["email"].lastIndexOf('.');
@@ -195,113 +202,24 @@ function App() {
   }
 
   return (
-    <div className="App">
-      {isLoaded ? (
-        <>
-          {ShowApp ? (
-            <AppHome />
-          ) : (
-            <>
-              {loginOp ? (
-                <div className="login-body">
-                  <div className="login-container">
-                    <h2 className="noselect">Welcome Back!</h2>
-                    <h5 className="noselect">We're so excited to see you again!</h5>
-                    <form className="login-form">
-                      <h4 style={{ color: 'red', fontWeight: '500' }}>{error}</h4>
-                      <label className="noselect">Email</label>
-                      <div className="holder">
-                        <FontAwesomeIcon icon={faUser} color="grey" className="usr-icon" id="usr-icon" />
-                        <input type="email" required className="login-username noselect" placeholder="Email" id="email" name="username" onChange={event => {
-                          setEmail(event.target.value);
-                          setError('');
-                          seteError('');
-                        }} />
-                      </div>
-                      <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '0' }}>{eerror}</h4>
-                      <label className="noselect">Password</label>
-                      <div className="holder">
-                        <FontAwesomeIcon icon={faKey} color="grey" className="pass-icon" />
-                        <input type="password" required className="login-password noselect" placeholder="Password" id="password" name="password" onChange={event => {
-                          setPassword(event.target.value);
-                          setpError('');
-                          setError('');
-                        }} />
-                      </div>
-                      <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '10px' }}>{perror}</h4>
-                      <label className="noselect">
-                        <input type="checkbox" checked={isAdmin} onChange={event => setIsAdmin(event.target.checked)} />
-                        Admin Login
-                      </label>
-                      {isAdmin && (
-                        <>
-                          <label className="noselect">Admin Code</label>
-                          <div className="holder">
-                            <FontAwesomeIcon icon={faKey} color="grey" className="pass-icon" />
-                            <input type="text" required className="login-admincode noselect" placeholder="Admin Code" id="adminCode" name="adminCode" onChange={event => {
-                              setAdminCode(event.target.value);
-                              setAdminCodeError('');
-                              setError('');
-                            }} />
-                          </div>
-                          <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '10px' }}>{adminCodeError}</h4>
-                        </>
-                      )}
-                      <a href="/forgot-password" className="btn forgot noselect">Forgot Password?</a>
-                    </form>
-                    <button className="btn login noselect" onClick={handleSubmitLogin}>Login</button>
-                    <div className="btn sign-up noselect" onClick={() => setLogO(false)}>Need an account? <span>Sign up</span></div>
-                  </div>
-                </div>
-              ) : (
-                <div className="sign-body">
-                  <div className="login-container">
-                    <h2 className="noselect">Create an account</h2>
-                    <form className="login-form">
-                      <h4 style={{ color: 'red', fontWeight: '500' }}>{error}</h4>
-                      <label className="noselect">Email</label>
-                      <div className="holder">
-                        <FontAwesomeIcon icon={faEnvelopeOpenText} color="grey" className="pass-icon" />
-                        <input type="email" required className="login-email noselect" placeholder="Email" id="Email" onChange={event => {
-                          setEmail(event.target.value);
-                          setError('');
-                          seteError('');
-                        }} />
-                      </div>
-                      <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '0' }}>{eerror}</h4>
-                      <label className="noselect">Username</label>
-                      <div className="holder">
-                        <FontAwesomeIcon icon={faUser} color="grey" className="usr-icon" id="usr-icon" />
-                        <input type="text" required className="login-username noselect" placeholder="Username" id="username" onChange={event => {
-                          setUsername(event.target.value);
-                          setuError('');
-                          setError('');
-                        }} />
-                      </div>
-                      <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '0px' }}>{uerror}</h4>
-                      <label className="noselect">Password</label>
-                      <div className="holder">
-                        <FontAwesomeIcon icon={faKey} color="grey" className="pass-icon" />
-                        <input type="password" required className="login-password noselect" placeholder="Password" id="password" onChange={event => {
-                          setPassword(event.target.value);
-                          setpError('');
-                          setError('');
-                        }} />
-                      </div>
-                      <h4 style={{ color: 'red', fontWeight: '500', marginBottom: '10px' }}>{perror}</h4>
-                    </form>
-                    <input type="submit" className="btn login noselect" onClick={handleSubmitRegister} value='Continue' />
-                    <div className="btn sign-up noselect" onClick={() => { setLogO(true); }}>Have an account? <span>Log in</span></div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </>
-      ) : (
-        <Loading />
-      )}
-    </div>
+    <Router>
+      <div className="App min-h-screen flex items-center justify-center bg-black">
+        {isLoaded ? (
+          ShowApp ?
+            <AppHome /> :
+            <Routes>
+              <Route path="/" element={<Landing setLoginState={setLoginState} isAdmin={isAdmin} setIsAdmin={setIsAdmin} />} />
+            </Routes>
+        ) :
+          <Loading />
+        }
+
+
+
+
+      </div>
+    </Router>
+
   );
 }
 

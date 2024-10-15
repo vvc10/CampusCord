@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AvailableChats from './AvailableChats';
 import Sidebar from '../components/Sidebar';
 import Chat from './Chat';
@@ -9,6 +9,9 @@ import socketIOClient from "socket.io-client";
 import url from "../url.json";
 import './css/ServerList.css';
 import Explore from './Explore';
+import YourProfile from './YourProfile';
+import LoginPage from './LoginPage';
+import Landing from '../components/Landing';
 
 export default function AppHome(props) {
     const user = useSelector(selectUser);
@@ -26,19 +29,18 @@ export default function AppHome(props) {
     if (!socket) return <div>Loading...</div>; // Render a loading state until the socket is initialized
 
     return (
-        <Router>
-            <div className="full-Body-container" id="app-body">
-                <Sidebar />
-                <div className="content-container">
-                    <Routes>
-                        <Route path="/" element={<AvailableChats user={user} socket={socket} />} />
-                        <Route path="/available-chats" element={<AvailableChats user={user} socket={socket} />} />
-                        <Route path="/chat" element={<Chat user={user} socket={socket} />} />
-                        <Route path="/explore" element={<Explore user={user} socket={socket} />} />
-
-                    </Routes>
-                </div>
+        <div className="full-Body-container" id="app-body">
+            <Sidebar />
+            <div className="content-container">
+                <Routes>
+                    {/* Redirect from "/" to "/home" when the user is authenticated */}
+                    <Route path="/" element={user ? <Navigate to="/home" /> : <Landing />} />
+                    <Route path="/home" element={<AvailableChats user={user} socket={socket} />} />
+                    <Route path="/chat" element={<Chat user={user} socket={socket} />} />
+                    <Route path="/explore" element={<Explore user={user} socket={socket} />} />
+                    <Route path="/yourprofile" element={<YourProfile user={user} socket={socket} />} />
+                </Routes>
             </div>
-        </Router>
+        </div>
     );
 }
