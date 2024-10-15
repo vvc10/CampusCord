@@ -37,4 +37,4 @@
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/campuscord.git
+   git clone https://github.com/vvc10/campuscord.git
