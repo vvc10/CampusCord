@@ -8,7 +8,7 @@ const Sidebar = () => {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <div className="fixed bottom-0 left-0 h-16 w-full md:w-[5vw] bg-gray-800 md:h-screen md:flex md:flex-col md:items-center md:py-4 md:bottom-auto md:left-auto md:static">
+        <div className="fixed z-50 bottom-0 left-0 h-16 w-full md:w-[5vw] bg-gray-800 md:h-screen md:flex md:flex-col md:items-center md:py-4 md:bottom-auto md:left-auto md:static">
             <div className='h-full md:h-fit md:m-auto flex flex-row md:flex-col gap-[20px] md:gap-[20px] justify-around md:justify-center'>
                 <Link
                     to="/home"

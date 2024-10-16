@@ -66,7 +66,7 @@ const Explore = () => {
   }, [publicServers]);
 
   return (
-    <div className='explore_div bg-[#1f232b] h-[100vh] w-[95vw]'>
+    <div className='explore_div bg-[#1f232b] h-[100vh] w-[100vw] md:w-[95vw]'>
       <Navbar />
       <div className='w-[100%] px-4 py-4 flex flex-row items-center'>
         <h2 className='font-[600] text-[18px] text-white text-left w-[60%] items-center'>
@@ -80,8 +80,8 @@ const Explore = () => {
             value={sortCriteria}
           >
             <option value='members'>Servers</option>
-            <option value='createdAt'>Creation Date</option>
-            <option value='name'>Name</option>
+            {/* <option value='createdAt'>Creation Date</option>
+            <option value='name'>Name</option> */}
           </select>
         </div>
       </div>

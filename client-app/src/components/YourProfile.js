@@ -4,6 +4,8 @@ import url from '../url.json';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux'; // Import useDispatch
 import { selectUser, logout } from '../features/userSlice'; // Import logout action
+import { AiOutlineLogout } from "react-icons/ai";
+import Loader from './Loader';
 
 const YourProfile = () => {
     const [userData, setUserData] = useState(null);
@@ -78,11 +80,11 @@ const YourProfile = () => {
     };
 
     return (
-        <div className="profile-container bg-[#1f232b] h-[100vh] w-[95vw]">
+        <div className="profile-container bg-[#1f232b] h-[100vh] w-[100vw] md:w-[95vw]">
             <div className="bg-red-0 text-white py-2 px-2 bg-transparent h-fit w-[94vw] items-center">
                 <div className="container mx-[10px] flex justify-between items-center">
                     {/* Heading */}
-                    <h1 className="text-[18px] font-[500]">Explore</h1>
+                    <h1 className="text-[18px] font-[500]">You</h1>
 
                     {/* Search Bar */}
                     <div className="relative bg-[#ffffff08] rounded-[30px]">
@@ -100,18 +102,23 @@ const YourProfile = () => {
 
             {userData ? (
                 <div className="container mx-auto p-4 rounded-lg text-white">
-                    <h2 className="text-2xl font-bold text-center mb-4">Your Profile</h2>
-                    <div className="flex flex-col items-center mb-6">
+                    {/* <h2 className="text-2xl font-bold text-center mb-4">Hey, {userData.name} </h2> */}
+                    <div className="flex flex-row gap-4 items-center justify-between mb-6 bg-gray-800 rounded-[15px] px-6 py-4">
                         <img
                             src={`/${userData.profile}`}
                             alt="Profile"
-                            className="w-32 h-32 rounded-full border-2 border-gray-300 mb-3"
+                            className="w-22 h-22 rounded-full border-2 border-gray-300 mb-3"
                         />
-                        <p className="text-lg font-semibold">Name: {userData.name}</p>
-                        <p className="text-gray-600">Email: {userData.email}</p>
+                        <div className='text-white text-left'>
+                            <p className="text-lg font-semibold">{userData.name}</p>
+                            <p className="text-gray-600">{userData.email}</p>
+
+                        </div>
+                        <button className='bg-white text-black rounded-full px-3 py-1'>edit</button>
+
                     </div>
 
-                    <form onSubmit={handleUpdateProfile} className="flex flex-col items-center">
+                    {/* <form onSubmit={handleUpdateProfile} className="flex flex-col items-center">
                         <input
                             type="file"
                             accept="image/*"
@@ -128,15 +135,15 @@ const YourProfile = () => {
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-red-600 transition duration-200 mt-4"
+                            className="text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-red-600 transition duration-200 mt-4"
                         >
-                            Log Out
+                            <AiOutlineLogout />
                         </button>
-                    </form>
+                    </form> */}
                     {message && <p className="text-red-500 mt-4 text-center">{message}</p>}
                 </div>
             ) : (
-                <p>Loading...</p>
+                <p><Loader/></p>
             )}
         </div>
     );

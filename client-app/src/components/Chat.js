@@ -13,6 +13,7 @@ import { RiSearch2Line } from "react-icons/ri";
 import { IoIosAttach, IoIosReturnLeft } from "react-icons/io";
 import EmojiEditor from './EmojiEditor';
 import { IoIosSend } from "react-icons/io";
+import { PiPlugsConnectedFill } from "react-icons/pi";
 
 export default function Chat(props) {
     const { channel } = useSelector(selectChannel);
@@ -23,7 +24,7 @@ export default function Chat(props) {
     };
     var socket = props.socket;
     const toggleSidebar = props.toggleSidebar;
-        let currentChannel = useSelector(selectChannel);
+    let currentChannel = useSelector(selectChannel);
     let currentUser = useSelector(selectUser);
     let currentServer = useSelector(selectServer);
     let [message, setMessage] = React.useState('');
@@ -117,7 +118,7 @@ export default function Chat(props) {
         setIsEmojiEditorOpen(false);
     };
 
- 
+
     return (
         <div className={`h-[100%] chat-container ${isSidebarVisible ? '' : 'expanded'}`}> {/* Apply class based on visibility */}
             <div className='chat-header-cs noselect'>
@@ -133,39 +134,56 @@ export default function Chat(props) {
                     <RiSearch2Line className='chead_ic' />
                 </div>
             </div>
+
+
             <div className='chat-display' ref={chatContainer}>
-                {previousMessageList.map((message, ind) => (
-                    <ChatDisplay
-                        lastmessage={ind === 0 ? 0 : { id: previousMessageList[ind - 1]["senderId"], date: previousMessageList[ind - 1]['time'] }}
-                        key={message._id}
-                        from={message.by}
-                        profileImage={message.senderProfile}
-                        date={message.time}
-                        msg={message.message}
-                        current={message["senderId"]}
-                        type={message.type}
-                        filedata={message.filedata}
-                        isFirstMessageOfConversation={ind === 0}
-                    />
-                ))}
-                {messageList.map((message, ind) => (
-                    <ChatDisplay
-                        lastmessage={ind === 0 ? previousMessageList[previousMessageList.length - 1] ? { id: previousMessageList[previousMessageList.length - 1]["senderId"], date: previousMessageList[previousMessageList.length - 1]['time'] } : { id: 0, date: "" } : { id: messageList[ind - 1][5], date: messageList[ind - 1][4] }}
-                        key={ind}
-                        from={message[1]}
-                        profileImage={message[2]}
-                        date={message[4]}
-                        msg={message[0]}
-                        current={message[5]}
-                        type={message[6]}
-                        filedata={message[7]}
-                        isFirstMessageOfConversation={ind === 0 && previousMessageList.length === 0}
-                    />
-                ))}
+                {/* Check if there are messages */}
+                {previousMessageList.length === 0 && messageList.length === 0 ? (
+                    <div className="no-messageplate flex flex-col items-center justify-center h-full rounded-lg shadow-lg p-6">
+                        <div className="flex flex-col items-center">
+                            <h2 className="text-[16px] opacity-90 font-[500] text-white mb-2">No Messages Yet!</h2>
+                            <p className="text-[16px] opacity-70 text-gray-300">Drop 'Hii' & Start the cording..</p>
+                        </div>
+                       <PiPlugsConnectedFill className='text-[#bdcbe0] text-[50px] font-[600] my-4 opacity-40'/>
+                    </div>
+
+                ) : (
+                    <>
+                        {previousMessageList.map((message, ind) => (
+                            <ChatDisplay
+                                lastmessage={ind === 0 ? 0 : { id: previousMessageList[ind - 1]["senderId"], date: previousMessageList[ind - 1]['time'] }}
+                                key={message._id}
+                                from={message.by}
+                                profileImage={message.senderProfile}
+                                date={message.time}
+                                msg={message.message}
+                                current={message["senderId"]}
+                                type={message.type}
+                                filedata={message.filedata}
+                                isFirstMessageOfConversation={ind === 0}
+                            />
+                        ))}
+                        {messageList.map((message, ind) => (
+                            <ChatDisplay
+                                lastmessage={ind === 0 ? previousMessageList[previousMessageList.length - 1] ? { id: previousMessageList[previousMessageList.length - 1]["senderId"], date: previousMessageList[previousMessageList.length - 1]['time'] } : { id: 0, date: "" } : { id: messageList[ind - 1][5], date: messageList[ind - 1][4] }}
+                                key={ind}
+                                from={message[1]}
+                                profileImage={message[2]}
+                                date={message[4]}
+                                msg={message[0]}
+                                current={message[5]}
+                                type={message[6]}
+                                filedata={message[7]}
+                                isFirstMessageOfConversation={ind === 0 && previousMessageList.length === 0}
+                            />
+                        ))}
+                    </>
+                )}
             </div>
 
+
             {channel.channelType == "text" ? (
-                <div className='chat-input'>
+                <div className='chat-input py-2'>
                     {selectedFile !== '' ?
                         <div className='file-name-display'>
                             <FontAwesomeIcon icon={faFile} style={{ margin: '0 2%', fontSize: "1.3rem", color: "rgb(150, 150, 150)", pointerEvents: "none" }} />
