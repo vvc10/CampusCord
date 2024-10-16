@@ -38,6 +38,13 @@ app.use(passport.session())
 app.use(fileUpload({}));
 app.use(express.static('usercontent'))
 
+// vercel live should be removed later //
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://vercel.live;");
+    next();
+  });
+
+  
 // Set the limit to something appropriate (e.g., '5mb')
 app.use(bodyParser.json({ limit: '1mb' }));
 app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
