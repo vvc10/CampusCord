@@ -1,12 +1,13 @@
 import React from 'react'
+import Loader from './Loader'
 
 export default function Loading() {
     return (
-        <div className='loading'>
+        <div className='bg-black w-fit h-fit mx-auto my-auto'>
             <h1>
-                Discord Clone
+                CampusCord
             </h1>
-            <h3>Loading...</h3>
+            <Loader />
         </div>
     )
 }
