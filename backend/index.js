@@ -16,12 +16,14 @@ const fs = require('fs/promises');
 const Fs = require('fs');
 const { uuid } = require('uuidv4');
 var morgan = require('morgan')
+const nodemailer = require('nodemailer');
 
 mongo()
 const User = require('./models/user')
 const ServerModel = require('./models/ServerModel')
 const ExploreSecModel = require('./models/ExploreSecModel'); // Adjust path as necessary
-
+const SubscribeModal = require('./models/SubscribeModal'); // Adjust path as necessary
+ 
 const ChannelModel = require('./models/ChannelModel')
 const ChatModel = require('./models/ChatModel')
 const ActiveVoiceChat = require('./models/ActiveVideoChatsModel')
@@ -37,14 +39,14 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(fileUpload({}));
 app.use(express.static('usercontent'))
-
+ 
 // vercel live should be removed later //
 app.use((req, res, next) => {
     res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://vercel.live;");
     next();
-  });
+});
 
-  
+
 // Set the limit to something appropriate (e.g., '5mb')
 app.use(bodyParser.json({ limit: '1mb' }));
 app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
@@ -52,7 +54,13 @@ app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
 require('./passportConfig')(passport)
 
 
-
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or 'smtp.your-email-provider.com'
+    auth: {
+        user: process.env.EMAIL_USER, // your email (set this in environment variables)
+        pass: process.env.EMAIL_PASS, // your email password (set this in environment variables)
+    },
+});
 
 
 function handleValidation(a) {
@@ -155,7 +163,7 @@ app.post('/api/register/server', async (req, res) => {
                     addedBy: admin
                 });
                 await exploreServer.save();
-                console.log("explore data:",exploreServer);
+                console.log("explore data:", exploreServer);
             }
 
             return res.send({ status: 'done', serverId: server._id });
@@ -524,6 +532,66 @@ app.post('/auth/logout', (req, res) => {
 });
 
 
+app.post('/subscribe', async (req, res) => {
+    console.log('Incoming request:', req.body);
+
+    if (validateEmail(req.body.email)) {
+        try {
+            // Check if the email already exists in the database
+            let subscriber = await Subscribed.findOne({ email: req.body.email });
+            
+            if (!subscriber) {
+                // Create new subscription entry
+                subscriber = await Subscribed.create({ email: req.body.email });
+
+                // Set up the email content using HTML template
+                const mailOptions = {
+                    from: process.env.EMAIL_USER, // Sender address
+                    to: req.body.email, // Receiver address (user's email)
+                    subject: 'You are Subscribed to CampusCord',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+                            <h1 style="color: #4F46E5;">Welcome to CampusCord!</h1>
+                            <p>Thank you for subscribing to <strong>CampusCord</strong>. We're excited to have you on board!</p>
+                            <p>We will keep you updated with the latest news, events, and opportunities happening on campus.</p>
+                            <p style="color: #6B7280;">Stay tuned and feel free to reach out to us anytime at <a href="mailto:support@campuscord.com">support@campuscord.com</a>.</p>
+                            <br>
+                            <footer style="font-size: 12px; color: #6B7280;">
+                                © 2024 CampusCord. All rights reserved.
+                            </footer>
+                        </div>
+                    `,
+                };
+
+                // Send the email
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Error sending email:', error);
+                        return res.status(500).send({ message: 'Subscription succeeded, but email could not be sent' });
+                    } else {
+                        console.log('Email sent:', info.response);
+                        res.send({ message: 'Subscription successful! Check your email for confirmation.' });
+                    }
+                });
+            } else {
+                res.status(400).send({ message: 'Email already subscribed' });
+            }
+        } catch (error) {
+            console.error('Error during subscription:', error);
+            res.status(500).send({ message: 'Server error, please try again later' });
+        }
+    } else {
+        res.status(401).send({ message: 'Invalid email format' });
+    }
+});
+
+
+// Email validation function
+const validateEmail = (email) => {
+    // Basic email regex validation (you can use a more complex one if needed)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
 
 
 app.get('/*', (req, res) => {

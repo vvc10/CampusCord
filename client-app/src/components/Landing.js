@@ -5,12 +5,16 @@ import Modal from "./Modal";
 import { TbUnlink } from "react-icons/tb";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendar, faComments, faBell } from '@fortawesome/free-solid-svg-icons';
+import url from '../url.json'
+import axios from "axios";
+import Message from "./ui/Message";
 
 
 export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Schedule');
-
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
@@ -26,7 +30,7 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
                         <li>Project deadline on Friday</li>
                         <li>Lunch with client at 1 PM</li>
                     </ul>
-                    <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
+                    <button onClick={openModal} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
                         View Full Schedule
                     </button>
                 </div>
@@ -43,7 +47,7 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
                         <li className="border-b py-2">Jane: Can you send me the report?</li>
                         <li className="border-b py-2">Paul: Don't forget about our call tomorrow.</li>
                     </ul>
-                    <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
+                    <button onClick={openModal} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
                         View All Messages
                     </button>
                 </div>
@@ -60,7 +64,7 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
                         <li>Your password has been updated</li>
                         <li>New follower: Sarah</li>
                     </ul>
-                    <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
+                    <button onClick={openModal} className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700">
                         Check All Notifications
                     </button>
                 </div>
@@ -69,12 +73,24 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
         },
     ];
 
+    const handleSubscribe = async (e) => {
+        e.preventDefault();
+
+        try {
+            const response = await axios.post(`${url.server}subscribe`, { email });
+            setMessage(response.data.message); // Display success message
+            setEmail(''); // Clear the input field
+        } catch (error) {
+            setMessage(error.response?.data?.message || 'Subscription failed, try again');
+        }
+    };
+
 
     return (
 
         <>
-            <div className="flex flex-col w-full  min-h-screen bg-gradient-to-b from-purple-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-white">
-                <header className="sticky top-[0] pt-[2%] z-50 w-full mx-auto">
+            <div className="flex flex-col w-[100%] md:w-full px-3 md:p-0  min-h-screen bg-gradient-to-b from-purple-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 text-white">
+                <header className="hidden md:block sticky top-[0] pt-[2%] z-50 w-full mx-auto">
                     <div className="container flex items-center px-4 py-4 rounded-[20px] justify-between bg-slate-800 bg-opacity-90 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 mx-auto">
                         <a className="flex items-center" href="/">
                             {/* Uncomment and customize the icon if needed */}
@@ -102,7 +118,34 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
                         </div>
                     </div>
                 </header>
+                <header className="block md:hidden sticky top-[0] pt-[2%] z-50 w-full mx-auto">
+                    <div className="container flex items-center px-4 py-4 rounded-[20px] justify-between bg-slate-800 bg-opacity-90 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 mx-auto">
+                        <a className="flex items-center" href="/">
+                            {/* Uncomment and customize the icon if needed */}
+                            {/* <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" /> */}
+                            <span className="ml-2 text-xl font-bold flex items-center">
+                                CampusC
+                                <TbUnlink className="text-[16px] ml-1" />
+                                rd
+                            </span>
+                        </a>
 
+                        <div className="w-fit">
+                            {/* <button
+                                onClick={openModal}
+                                className="text-white bg-gray-900 font-[400] text-[16px] py-2 px-5 mx-4 rounded-lg shadow hover:opacity-80 transition duration-200 ease-in-out"
+                            >
+                                Github
+                            </button> */}
+                            <button
+                                onClick={openModal}
+                                className="bg-white text-black font-[400] text-[16px] py-2 px-5 rounded-lg shadow hover:opacity-80 transition duration-200 ease-in-out"
+                            >
+                                Join Now
+                            </button>
+                        </div>
+                    </div>
+                </header>
                 <main className="flex-1 mx-auto w-full mt-[2%]">
                     {/* Hero Section */}
                     <section className="container mx-auto rounded-[20px] py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white">
@@ -217,14 +260,14 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
                             <div className="mt-12">
                                 <div className="w-full">
                                     {/* Tabs */}
-                                    <div className="tabs-list flex justify-center border-b border-indigo-400">
+                                    <div className="tabs-list text-center items-center flex justify-center border-none border-indigo-400 flex-col gap-2 md:flex-row">
                                         {tabs.map((tab) => (
                                             <button
                                                 key={tab.name}
                                                 onClick={() => setActiveTab(tab.name)} // Update active tab on click
-                                                className={`tabs-trigger flex items-center px-6 py-3 text-indigo-200 transition-colors duration-200 border-b-2 ${activeTab === tab.name
-                                                    ? "border-white"
-                                                    : "border-transparent hover:border-white"
+                                                className={`tabs-trigger text-center flex items-center px-4 py-1 text-indigo-200 transition-colors duration-200 ${activeTab === tab.name
+                                                    ? "border-none rounded-[50px] bg-[#736ed6]"
+                                                    : "border-transparent"
                                                     } focus:outline-none`}
                                             >
                                                 <FontAwesomeIcon icon={tab.icon} className="mr-2" />
@@ -279,16 +322,25 @@ export default function Landing({ setLoginState, isAdmin, setIsAdmin }) {
                                 </Link>
                             </nav>
                             <div className="flex items-center mt-4 md:mt-0">
+
                                 <input
                                     className="mr-2 p-2 rounded-md border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:focus:ring-purple-400"
                                     placeholder="Enter your email"
                                     type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
-                                <button className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors duration-200">
+
+                                <button
+                                    className="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors duration-200"
+                                    onClick={handleSubscribe}
+                                >
                                     Subscribe
                                 </button>
+
                             </div>
                         </div>
+                        {message && <Message message={message} />}
                         <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
                             © 2024 CampusCord. All rights reserved.
                         </div>

@@ -15,6 +15,7 @@ import bgImg from './components/img/1.jpg';
 import Landing from './components/Landing';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Corrected import
 import Login from './components/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   let [ShowApp, setShowApp] = useState(false);
@@ -206,7 +207,10 @@ function App() {
       <div className="App min-h-screen flex items-center justify-center bg-black">
         {isLoaded ? (
           ShowApp ?
-            <AppHome /> :
+            <ProtectedRoute>
+              <AppHome />
+            </ProtectedRoute>
+            :
             <Routes>
               <Route path="/" element={<Landing setLoginState={setLoginState} isAdmin={isAdmin} setIsAdmin={setIsAdmin} />} />
             </Routes>

@@ -1,6 +1,71 @@
 import Link from "../components/LayoutL.js"
 
-export default function Component() {
+function MergeIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m8 6 4-4 4 4" />
+      <path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22" />
+      <path d="m20 22-5-5" />
+    </svg>
+  )
+}
+
+
+function ShareIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" x2="12" y1="2" y2="15" />
+    </svg>
+  )
+}
+
+
+function StickyNoteIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z" />
+      <path d="M15 3v6h6" />
+    </svg>
+  )
+}
+ 
+ 
+export default function Landing() {
   return (
     <main className="flex flex-col min-h-[100dvh]">
       <section className="w-full py-20 md:py-32 lg:py-40 bg-gradient-to-r from-[#5C6BC0] to-[#7986CB]">
@@ -82,107 +147,4 @@ export default function Component() {
     </main>
   )
 }
-
-function MergeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m8 6 4-4 4 4" />
-      <path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22" />
-      <path d="m20 22-5-5" />
-    </svg>
-  )
-}
-
-
-function ShareIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-      <polyline points="16 6 12 2 8 6" />
-      <line x1="12" x2="12" y1="2" y2="15" />
-    </svg>
-  )
-}
-
-
-function StickyNoteIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15.5 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z" />
-      <path d="M15 3v6h6" />
-    </svg>
-  )
-}
-
-=== styles.css ===
-
-body {
-  font-family: var(--font-comfortaa), sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-gabarito), sans-serif;
-}
-
-=== layout.jsx ===
-
-// This is the root layout component for your Next.js app.
-// Learn more: https://nextjs.org/docs/app/building-your-application/routing/pages-and-layouts#root-layout-required
-
-import { Gabarito } from 'next/font/google'
-import { Comfortaa } from 'next/font/google'
-import './styles.css'
-
-const gabarito = Gabarito({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-gabarito',
-})
-const comfortaa = Comfortaa({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-comfortaa',
-})
-
-export default function Layout({ children }) {
-  return (
-    <html lang="en">
-      <body className={gabarito.variable + ' ' + comfortaa.variable}>
-        {children}
-      </body>
-    </html>
-  )
-}
+ 
