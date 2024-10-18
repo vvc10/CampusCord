@@ -28,7 +28,12 @@ const ChannelModel = require('./models/ChannelModel')
 const ChatModel = require('./models/ChatModel')
 const ActiveVoiceChat = require('./models/ActiveVideoChatsModel')
 const path = require("path");
-app.use(cors({ origin: url.frontend, credentials: true }))
+app.use(cors({
+    origin: url.frontend, // Frontend URL from url.json
+    credentials: true,    // Allow cookies and credentials
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization',
+}));
 app.options('*', cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
