@@ -35,6 +35,8 @@ app.use(cors({
     allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization',
 }));
 app.options('*', cors())
+ 
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(session({ cookie: { sameSite: 'lax' }, secret: process.env.COOKIE_SECRET, resave: true, saveUninitialized: false }))
