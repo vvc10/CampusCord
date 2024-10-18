@@ -1,10 +1,5 @@
-
-
 {
     "peerHost": "https://campus-cord-vvc10.vercel.app",
-     "server": "https://campus-cord-server.vercel.app/",
+    "server": "https://campus-cord-server.vercel.app/",
     "frontend": "https://campus-cord-vvc10.vercel.app/"
 }
-
- 
- 

@@ -64,7 +64,7 @@ function Login({ setLoginState, isAdmin, setIsAdmin }) {
 
   return (
     <>
-      <div className="login_form w-[100%] flex-row gap-4 items-center hidden md:block">
+      <div className="login_form w-[100%] md:flex md:flex-row gap-4 items-center hidden md:block">
 
         <div className='h-fit w-[40%] border-l-indigo-900 mx-[10px]'>
           <h2 className="flex flex-row items-center text-2xl font-bold mb-4 text-center">
@@ -107,13 +107,13 @@ function Login({ setLoginState, isAdmin, setIsAdmin }) {
 
         <div className='rg_img w-[60%] h-[100%] relative'>
           <img src={campusImg} className="w-full h-full object-cover rounded-[15px]" />
-          <h2 className='absolute top-[38%] right-[-30%] rotate-90 text-[63px] font-[900] text-white'>Campuscord</h2>
+          {/* <h2 className='absolute top-[38%] right-[-30%] rotate-90 text-[63px] font-[900] text-white'>Campuscord</h2> */}
         </div>
 
       </div>
 
 
-      <div className="login_form w-[100%] flex flex-col gap-4 items-center md:hidden">
+      <div className="login_form w-[100%] flex-col gap-4 items-center block md:hidden">
 
         <div className='rg_img w-[100%] h-[60%] relative'>
           <img src={campusImg} className="w-full h-full object-cover rounded-[15px]" />
