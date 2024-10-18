@@ -6,8 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "run-index": "node index.js"
+    "run-index": "node index.js",
+    "frontend-build": "cd ../client && npm install && npm run build",
+    "backend-build": "npm install",
+    "build": "npm run frontend-build && npm run backend-build"
   },
+ 
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -30,6 +34,7 @@
     "passport-local": "^1.0.0",
     "peer": "^0.6.1",
     "react-image-file-resizer": "^0.4.8",
+    "react-scripts": "^5.0.1",
     "socket.io": "^4.1.2",
     "uuidv4": "^6.2.13"
   }

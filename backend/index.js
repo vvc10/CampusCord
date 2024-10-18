@@ -38,7 +38,7 @@ app.use(morgan('dev'))
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(fileUpload({}));
-app.use(express.static('usercontent'))
+app.use(express.static('userdata'))
  
 // vercel live should be removed later //
 app.use((req, res, next) => {
@@ -319,7 +319,7 @@ app.post('/update/userdata', async (req, res) => {
         if (fname.mimetype === "image/jpeg") path = 'profile/' + req.user.id + ".jpg";
         if (fname.mimetype === "image/png") path = 'profile/' + req.user.id + ".png";
         if (fname.mimetype === "image/gif") path = 'profile/' + req.user.id + ".gif";
-        fname.mv(__dirname + "/usercontent/" + path, async (error) => {
+        fname.mv(__dirname + "/userdata/" + path, async (error) => {
             if (error) {
                 console.error(error)
                 res.writeHead(500, {
@@ -399,7 +399,7 @@ app.post('/update/server', async (req, res) => {
         if (fname.mimetype === "image/jpeg") path = 'serverProfile/' + serverId + ".jpg";
         if (fname.mimetype === "image/png") path = 'serverProfile/' + serverId + ".png";
         if (fname.mimetype === "image/gif") path = 'serverProfile/' + serverId + ".gif";
-        fname.mv(__dirname + "/usercontent/" + path, async (error) => {
+        fname.mv(__dirname + "/userdata/" + path, async (error) => {
             if (error) {
                 console.error(error)
                 res.writeHead(500, {
@@ -428,11 +428,11 @@ app.post('/upload-file', async (req, res) => {
         let folder = "files/"
         let Fileid = uuid()
         var fileExt = file.name.split('.').pop();
-        while (Fs.existsSync("./usercontent/" + folder + Fileid + '.' + fileExt)) {
+        while (Fs.existsSync("./userdata/" + folder + Fileid + '.' + fileExt)) {
             Fileid = uuid()
         }
         console.log(file)
-        file.mv("./usercontent/" + folder + Fileid + "." + fileExt, async (error) => {
+        file.mv("./userdata/" + folder + Fileid + "." + fileExt, async (error) => {
             if (error) {
                 console.error(error)
                 res.writeHead(500, {
@@ -595,7 +595,7 @@ const validateEmail = (email) => {
 
 
 app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, "usercontent", "index.html"));
+    res.sendFile(path.join(__dirname, "userdata", "index.html"));
 })
 io.on('connection', socket => {
     console.log(socket.client.conn.server.clientsCount)
