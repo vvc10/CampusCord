@@ -1,4 +1,4 @@
 {
-    "server": "https://campus-cord-ft5u.vercel.app/",
+    "server": "https://campus-cord-server.vercel.app/",
     "frontend": "https://campus-cord-vvc10.vercel.app/"
 }
