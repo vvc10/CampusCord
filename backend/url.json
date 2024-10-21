@@ -1,4 +1,4 @@
 {
-    "server": "https://campuscord-2.onrender.com/",
-    "frontend": "https://campuscord-6.onrender.com/"
+    "server": "https://campus-cord-server-vv10.vercel.app/",
+    "frontend": "https://campuscord-vvc10.vercel.app/"
 }

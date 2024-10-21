@@ -29,7 +29,7 @@ const ChatModel = require('./models/ChatModel')
 const ActiveVoiceChat = require('./models/ActiveVideoChatsModel')
 const path = require("path");
 app.use(cors({
-    origin: url.frontend, // Frontend URL from url.json
+    origin: 'https://campuscord-vvc10.vercel.app/', // Frontend URL from url.json
     credentials: true,    // Allow cookies and credentials
     methods: 'GET,POST,PUT,DELETE,OPTIONS',
     allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization',
